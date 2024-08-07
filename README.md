@@ -1,3 +1,42 @@
+# Fork changes
+
+This repository is a fork from the official FaceDiffuser repository to attempt some bug corrections. Please check out the official repository at this [link](https://github.com/uuembodiedsocialai/FaceDiffuser).
+
+## Installation
+For python 3.9:
+
+- Install Pytorch 1.10.1+cu111 from PyTorch website.
+- Install requirements.txt with the following command:
+
+        pip install -r requirements.txt
+
+- **(Optional)** Install ffmpeg if you want to render sequences
+
+
+## Usage
+
+To simplify the reproduction of results, I create a main file that relies on a global config file which can call the training/testing/evaluating process. Here's how to use it:
+
+        python ./main.py --script <name_of_script> --config <path_to_config_file>
+
+For instance, if you want to train and evaluate a model you would use the following:
+
+        python ./main.py --script train --config ./configs/vocaset.yaml
+        python ./main.py --script test --config ./configs/vocaset.yaml
+        python ./main.py --script evaluation.compute_objective_metrics --config ./configs/vocaset.yaml
+
+
+## Disclaimers
+
+I've only tested the train/test and compute_objective_metrics. I can't guarantee  that the proposed modifications didn't break the rest of the code. I also only tested the code with VOCASET and MULTIFACE datasets.
+
+## License 
+
+This project is subject to the original authors [license](https://github.com/uuembodiedsocialai/FaceDiffuser/blob/main/LICENSE).
+
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
 # FaceDiffuser (MIG '23)
 Code repository for the implementation of: *FaceDiffuser: Speech-Driven Facial Animation Synthesis Using Diffusion.*
 > 

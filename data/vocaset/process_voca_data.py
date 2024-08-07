@@ -16,6 +16,7 @@ def generate_vertices_npy(args,face_vert_mmap,data2array_verts):
     if not os.path.exists(args.vertices_npy_path):
         os.makedirs(args.vertices_npy_path)
     for sub in data2array_verts.keys():
+        print(sub)
         for seq in data2array_verts[sub].keys():
             vertices_npy_name = sub + "_" + seq
             vertices_npy = []
@@ -28,6 +29,7 @@ def generate_wav(args,raw_audio):
     if not os.path.exists(args.wav_path):
         os.makedirs(args.wav_path)
     for sub in raw_audio.keys():
+        print(sub)
         for seq in raw_audio[sub].keys():
             wav_name = sub + "_" + seq
             wavfile.write(os.path.join(args.wav_path, wav_name+'.wav'), raw_audio[sub][seq]['sample_rate'], raw_audio[sub][seq]['audio'])

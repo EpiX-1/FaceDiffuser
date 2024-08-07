@@ -1,6 +1,13 @@
 */__pycache__/*
 .*
 *.pyc
-data/
+data/multiface/vertices_npy/
+data/multiface/wav/
+data/vocaset/vertices_npy/
+data/vocaset/wav/
+
 demo/*
 pretrained_models/*
+renders/
+result/
+save/

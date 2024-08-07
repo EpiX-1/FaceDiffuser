@@ -90,25 +90,28 @@ def create_sequence(sequence_path, face_id):
             nr_values += 1
             sequence.append(vertices)
     seq = np.array(sequence)
-    seq_filename = os.path.join(path_to_save, f"{face_id}_{mapping[os.path.basename(sequence_path)]}.npy")
+    seq_filename = os.path.join(path_to_save, f"{face_id}.npy")
     np.save(seq_filename, seq)
     print(f"Done {seq_filename}")
     return nr_values
 
 
-def create_subject_sequences(subject):
-    audio_path = os.path.join(subject, 'tracked_mesh')
-    index = 1
+def create_subject_sequences(subject,index):
+    audio_path = os.path.join(subject, 'audio')
+    
     for x in os.scandir(audio_path):
         shutil.copy(x,
-                    os.path.join(path_to_save, f"{os.path.basename(subject)}_{mapping[os.path.basename(x)[:-4]]}.wav")
+                    os.path.join('wav', f"{index}_{mapping[os.path.basename(x)[:-4]]}.wav")
                     )
-        create_sequence(x.path, f"{index:02d}")
-        index += 1
-
+        mesh_path = os.path.join(subject, 'tracked_mesh',x.name[:-4])
+        create_sequence(mesh_path, f"{index}_{mapping[os.path.basename(x)[:-4]]}")
+        
+    return index
 
 if __name__ == '__main__':
     path_to_dataset = 'multiface' # path to downloaded set
     subjects = [x.path for x in os.scandir(path_to_dataset)]
+    index = 1
     for s in subjects:
-        create_subject_sequences(s)
+        index=create_subject_sequences(s,index)
+        index += 1

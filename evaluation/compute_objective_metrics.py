@@ -4,24 +4,14 @@ import os
 import pickle
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--train_subjects", type=str, default="F2 F3 F4 M3 M4 M5")
-    parser.add_argument("--pred_path", type=str, default="RUN/BIWI/CodeTalker_s2/result/npy/")
-    parser.add_argument("--gt_path", type=str, default="/data/BIWI/vertices_npy/")
-    parser.add_argument("--region_path", type=str, default="/data/BIWI/regions/")
-    parser.add_argument("--templates_path", type=str, default="/data/BIWI/templates.pkl")
-    parser.add_argument("--model", type=str, default="")
-    parser.add_argument("--num_sample", type=str)
-    parser.add_argument("--dataset", type=str, default="BIWI")
-    args = parser.parse_args()
-
+def main(args):
     train_subject_list = args.train_subjects.split(" ")
-
+    test_subject_list = args.test_subjects.split(" ")
+    template_path=os.path.join(args.data_path, args.dataset, args.template_file)
     if args.dataset == "BIWI":
         sentence_list = ["e" + str(i).zfill(2) for i in range(37, 41)]
 
-        with open(args.templates_path, 'rb') as fin:
+        with open(template_path, 'rb') as fin:
             templates = pickle.load(fin, encoding='latin1')
 
         with open(os.path.join(args.region_path, "lve.txt")) as f:
@@ -32,12 +22,26 @@ def main():
             maps = f.read().split(", ")
             upper_map = [int(i) for i in maps]
         nr_vertices = 23370
+
+    elif args.dataset == "vocaset":
+        sentence_list = [f'sentence{i}' for i in range(21, 41)]
+
+        with open(template_path, 'rb') as fin:
+            templates = pickle.load(fin, encoding='latin1')
+
+        with open(os.path.join(args.region_path, "lve.txt")) as f:
+            maps = f.read().split(",")
+            mouth_map = [int(i) for i in maps]
+
+        with open(os.path.join(args.region_path, "fdd.txt")) as f:
+            maps = f.read().split(",")
+            upper_map = [int(i) for i in maps]
+        nr_vertices = 5023
     else:
         nr_vertices = 6172
-
         sentence_list = [str(i) for i in range(46, 51)]
 
-        with open(args.templates_path, 'rb') as fin:
+        with open(template_path, 'rb') as fin:
             templates = pickle.load(fin, encoding='latin1')
 
         with open(os.path.join(args.region_path, "weighted_mouth_mask.txt")) as f:
@@ -62,55 +66,53 @@ def main():
 
     mve = 0
     num_seq = 0
-    for subject in train_subject_list:
+    for subject in test_subject_list:
         for sentence in sentence_list:
-            vertices_gt = np.load(os.path.join(args.gt_path, subject + "_" + sentence + ".npy")).reshape(-1, nr_vertices, 3)
+            print(subject, sentence)
 
-            if args.model != "":
+            for condition in train_subject_list: 
+                if not os.path.exists(os.path.join(args.result_path,args.model, subject + "_" + sentence + "_condition_" + condition + ".npy")):
+                    continue
+                vertices_gt = np.load(os.path.join(args.gt_path, subject + "_" + sentence + ".npy")).reshape(-1, nr_vertices, 3) 
                 vertices_pred = np.load(
-                    os.path.join(args.pred_path, args.model + "_" + subject + "_" + sentence + "_condition_" + subject + ".npy")).reshape(-1,
-                                                                                                                   nr_vertices,
-                                                                                                                   3)
-            else:
-                vertices_pred = np.load(
-                    os.path.join(args.pred_path, subject + "_" + sentence + "_condition_" + subject + ".npy")).reshape(-1,
-                                                                                                                   nr_vertices,
-                                                                                                                   3)
+                    os.path.join(args.result_path,args.model, subject + "_" + sentence + "_condition_" + condition + ".npy")).reshape(-1,
+                                                                                                                    nr_vertices,
+                                                                                                                    3)
 
-            vertices_pred = vertices_pred[:vertices_gt.shape[0], :, :]
-            vertices_gt = vertices_gt[:vertices_pred.shape[0], :, :]
+                vertices_pred = vertices_pred[:vertices_gt.shape[0], :, :]
+                vertices_gt = vertices_gt[:vertices_pred.shape[0], :, :]
 
-            print(vertices_pred.shape)
-            mve += np.linalg.norm(vertices_gt - vertices_pred, axis = 2).mean(axis=1).mean()
+                print(vertices_pred.shape)
+                mve += np.linalg.norm(vertices_gt - vertices_pred, axis = 2).mean(axis=1).mean()
 
 
-            motion_pred = vertices_pred - templates[subject].reshape(1, nr_vertices, 3)
-            motion_gt = vertices_gt - templates[subject].reshape(1, nr_vertices, 3)
+                motion_pred = vertices_pred - templates[subject].reshape(1, nr_vertices, 3)
+                motion_gt = vertices_gt - templates[subject].reshape(1, nr_vertices, 3)
 
-            cnt += vertices_gt.shape[0]
+                cnt += vertices_gt.shape[0]
 
-            vertices_gt_all.extend(list(vertices_gt))
-            vertices_pred_all.extend(list(vertices_pred))
+                vertices_gt_all.extend(list(vertices_gt))
+                vertices_pred_all.extend(list(vertices_pred))
 
-            L2_dis_upper = np.array([np.square(motion_gt[:, v, :]) for v in upper_map])
-            L2_dis_upper = np.transpose(L2_dis_upper, (1, 0, 2))
-            L2_dis_upper = np.sum(L2_dis_upper, axis=2)
-            L2_dis_upper = np.std(L2_dis_upper, axis=0)
-            gt_motion_std = np.mean(L2_dis_upper)
+                L2_dis_upper = np.array([np.square(motion_gt[:, v, :]) for v in upper_map])
+                L2_dis_upper = np.transpose(L2_dis_upper, (1, 0, 2))
+                L2_dis_upper = np.sum(L2_dis_upper, axis=2)
+                L2_dis_upper = np.std(L2_dis_upper, axis=0)
+                gt_motion_std = np.mean(L2_dis_upper)
 
-            L2_dis_upper = np.array([np.square(motion_pred[:, v, :]) for v in upper_map])
-            L2_dis_upper = np.transpose(L2_dis_upper, (1, 0, 2))
-            L2_dis_upper = np.sum(L2_dis_upper, axis=2)
-            L2_dis_upper = np.std(L2_dis_upper, axis=0)
-            pred_motion_std = np.mean(L2_dis_upper)
+                L2_dis_upper = np.array([np.square(motion_pred[:, v, :]) for v in upper_map])
+                L2_dis_upper = np.transpose(L2_dis_upper, (1, 0, 2))
+                L2_dis_upper = np.sum(L2_dis_upper, axis=2)
+                L2_dis_upper = np.std(L2_dis_upper, axis=0)
+                pred_motion_std = np.mean(L2_dis_upper)
 
-            motion_std_difference.append(gt_motion_std - pred_motion_std)
-            abs_motion_std_difference.append(np.abs(gt_motion_std - pred_motion_std))
-            print(f"{subject}_{sentence}")
-            print('FDD: {:.4e}'.format(motion_std_difference[-1]), 'FDD: {:.4e}'.format(sum(motion_std_difference) / len(motion_std_difference)))
+                motion_std_difference.append(gt_motion_std - pred_motion_std)
+                abs_motion_std_difference.append(np.abs(gt_motion_std - pred_motion_std))
+                print(f"{subject}_{sentence}")
+                print('FDD: {:.4e}'.format(motion_std_difference[-1]), 'FDD: {:.4e}'.format(sum(motion_std_difference) / len(motion_std_difference)))
 
-            num_seq += 1
-
+                num_seq += 1
+    print('--------------')
     print('Frame Number: {}'.format(cnt))
 
     vertices_gt_all = np.array(vertices_gt_all)
@@ -133,19 +135,7 @@ def main():
     print('ABS FDD: {:.4e}'.format(sum(abs_motion_std_difference) / len(motion_std_difference)))
 
 
-def compute_diversity():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--train_subjects", type=str, default="F2 F3 F4 M3 M4 M5")
-    parser.add_argument("--test_subjects", type=str, default="F1 F5 F6 F7 F8 M1 M2 M6")
-    parser.add_argument("--pred_path", type=str, default="RUN/BIWI/CodeTalker_s2/result/npy/")
-    parser.add_argument("--gt_path", type=str, default="/data/BIWI/vertices_npy/")
-    parser.add_argument("--region_path", type=str, default="/data/BIWI/regions/")
-    parser.add_argument("--templates_path", type=str, default="/data/BIWI/templates.pkl")
-    parser.add_argument("--model", type=str, default="")
-    parser.add_argument("--num_sample", type=str)
-    parser.add_argument("--dataset", type=str, default="BIWI")
-    args = parser.parse_args()
-
+def compute_diversity(args):
     train_subject_list = args.train_subjects.split(" ")
     test_subject_list = args.test_subjects.split(" ")
 
@@ -153,6 +143,9 @@ def compute_diversity():
     if args.dataset == "BIWI":
         sentence_list = ["e" + str(i).zfill(2) for i in range(37, 41)]
         nr_vertices = 23370
+    elif args.dataset == "vocaset":
+        sentence_list = [f'sentence{i}' for i in range(21, 41)]
+        nr_vertices = 5023
     else:
         nr_vertices = 6172
 
@@ -166,10 +159,10 @@ def compute_diversity():
             print(subject, sentence)
             all_pred_seq = []
             for condition in train_subject_list:
-                if not os.path.exists(os.path.join(args.pred_path, subject + "_" + sentence + "_condition_" + condition + ".npy")):
+                if not os.path.exists(os.path.join(args.result_path,args.model, subject + "_" + sentence + "_condition_" + condition + ".npy")):
                     continue
                 vertices_pred = np.load(
-                    os.path.join(args.pred_path, subject + "_" + sentence + "_condition_" + condition + ".npy")).reshape(
+                    os.path.join(args.result_path,args.model, subject + "_" + sentence + "_condition_" + condition + ".npy")).reshape(
                     -1,
                     nr_vertices,
                     3)
@@ -187,10 +180,25 @@ def compute_diversity():
             diversity += tottal_diff_seq
 
             num_seq += 1
-
+    print('-----------')
     print('Diversity: {:.4e}'.format(diversity / num_seq))
 
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--train_subjects", type=str, default="FaceTalk_170728_03272_TA FaceTalk_170904_00128_TA FaceTalk_170725_00137_TA FaceTalk_170915_00223_TA FaceTalk_170811_03274_TA FaceTalk_170913_03279_TA FaceTalk_170904_03276_TA FaceTalk_170912_03278_TA")
+    parser.add_argument("--test_subjects", type=str, default="FaceTalk_170731_00024_TA FaceTalk_170809_00138_TA")
+    parser.add_argument("--result_path", type=str, default="result/")
+    parser.add_argument("--data_path", type=str, default="data")
+    parser.add_argument("--gt_path", type=str, default="data/vocaset/vertices_npy/")
+    parser.add_argument("--region_path", type=str, default="data/vocaset/regions/")
+    parser.add_argument("--template_file", type=str, default="templates.pkl")
+    parser.add_argument("--model", type=str, default="model_name")
+    parser.add_argument("--num_sample", type=str)
+    parser.add_argument("--dataset", type=str, default="vocaset")
+    args = parser.parse_args()
+    return args
 
 if __name__ == "__main__":
-    main()
-    compute_diversity()
+    args=get_args()
+    main(args)
+    compute_diversity(args)

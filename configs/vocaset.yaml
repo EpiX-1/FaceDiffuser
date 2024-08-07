@@ -1,0 +1,46 @@
+## COMMON ##
+vertice_dim: 15069
+feature_dim: 256
+gru_dim: 256
+gru_layers: 2
+model: "model_name"
+input_fps: 50
+output_fps: 30
+diff_steps: 1000
+skip_steps: 0
+num_samples: 1
+
+
+## DATASET
+dataset: "vocaset"
+train_subjects: "FaceTalk_170728_03272_TA FaceTalk_170904_00128_TA FaceTalk_170725_00137_TA FaceTalk_170915_00223_TA FaceTalk_170811_03274_TA FaceTalk_170913_03279_TA FaceTalk_170904_03276_TA FaceTalk_170912_03278_TA"
+val_subjects: "FaceTalk_170811_03275_TA FaceTalk_170908_03277_TA"
+test_subjects: "FaceTalk_170731_00024_TA FaceTalk_170809_00138_TA"
+## PATH ##
+gt_path:  "data/vocaset/vertices_npy/"
+region_path: "data/vocaset/regions/"
+template_file: "templates.pkl"
+
+## COMMON PATH ##
+data_path: "data"
+wav_path: "wav"
+vertices_path: "vertices_npy"
+save_path: "save"
+result_path: "result"
+
+
+## TRAINING ##
+lr: 0.0001
+gradient_accumulation_steps: 1
+max_epoch: 1
+device: "cuda"
+beta_type: "linear"   ## "cosine","linear"
+
+
+
+
+
+
+
+
+

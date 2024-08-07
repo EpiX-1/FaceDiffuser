@@ -14,7 +14,8 @@ import librosa
 class Dataset(data.Dataset):
     """Custom data.Dataset compatible with data.DataLoader."""
 
-    def __init__(self, data, subjects_dict, data_type="train"):
+    def __init__(self, data, subjects_dict, data_type="train",dataset_type=None):
+        self.dataset_type=dataset_type
         self.data = data
         self.len = len(self.data)
         self.subjects_dict = subjects_dict
@@ -29,7 +30,10 @@ class Dataset(data.Dataset):
         template = self.data[index]["template"]
 
         if self.data_type == "train":
-            subject = file_name.split("_")[0]
+            if self.dataset_type=='vocaset':
+                subject="_".join(file_name.split("_")[:-1])  ##voca
+            elif self.dataset_type=='multiface':
+                subject = file_name.split("_")[0]
             one_hot = self.one_hot_labels[self.subjects_dict["train"].index(subject)]
         else:
             one_hot = self.one_hot_labels
@@ -59,7 +63,7 @@ def read_data(args):
         templates = pickle.load(fin, encoding='latin1')
 
     indices_to_split = []
-    all_subjects = args.test_subjects.split() + args.val_subjects.split() + args.test_subjects.split()
+    all_subjects=list(set(args.train_subjects.split() + args.val_subjects.split() + args.test_subjects.split()))
     for r, ds, fs in os.walk(audio_path):
         for f in tqdm(fs):
             if f.endswith("wav"):
@@ -200,12 +204,12 @@ def get_dataloaders(args):
     g.manual_seed(0)
     dataset = {}
     train_data, valid_data, test_data, subjects_dict = read_data(args)
-    train_data = Dataset(train_data, subjects_dict, "train")
+    train_data = Dataset(train_data, subjects_dict, "train",dataset_type=args.dataset)
     dataset["train"] = data.DataLoader(dataset=train_data, batch_size=1, shuffle=True, worker_init_fn=seed_worker,
                                        generator=g)
-    valid_data = Dataset(valid_data, subjects_dict, "val")
+    valid_data = Dataset(valid_data, subjects_dict, "val",dataset_type=args.dataset)
     dataset["valid"] = data.DataLoader(dataset=valid_data, batch_size=1, shuffle=False)
-    test_data = Dataset(test_data, subjects_dict, "test")
+    test_data = Dataset(test_data, subjects_dict, "test",dataset_type=args.dataset)
     dataset["test"] = data.DataLoader(dataset=test_data, batch_size=1, shuffle=False)
     return dataset
 

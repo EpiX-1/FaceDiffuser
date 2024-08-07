@@ -42,7 +42,7 @@ def test_model(args):
         )
     print(model)
 
-    model.load_state_dict(torch.load('pretrained_models/{}.pth'.format(args.model_name), map_location='cuda'))
+    model.load_state_dict(torch.load(args.model, map_location='cuda'))
     model = model.to(torch.device(args.device))
     model.eval()
 
@@ -122,8 +122,8 @@ def test_model(args):
 
 def render(args):
     fps = args.fps
-    fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-    render_path = "demo/renders/"
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    render_path = "renders/"
     frames_folder = render_path + "tmp/"
     video_woA_folder = frames_folder
     video_wA_folder = render_path + "video_with_audio/"
@@ -132,8 +132,15 @@ def render(args):
     test_name = os.path.basename(wav_path).split(".")[0]
     out_file_name = test_name + "_" + args.dataset + "_" + args.subject + "_condition_" + args.condition
     predicted_vertices_path = os.path.join(args.result_path, out_file_name + ".npy")
-    template_file = f"data/{args.dataset}/templates/face_template.obj"
-    camera_dist = 2.0 if args.dataset == "multiface"  else 1.0
+   
+    if args.dataset=='vocaset':
+        template_file = f"data/{args.dataset}/templates/{args.subject}.ply"  ##vocaset
+    else:
+        template_file = f"data/{args.dataset}/templates/face_template.obj"
+   
+    
+
+    camera_dist = 2.0 if args.dataset == "multiface"  else 0.3
 
 
     cam = pyrender.PerspectiveCamera(yfov=np.pi / 3.0, aspectRatio=1.414)
@@ -166,7 +173,7 @@ def render(args):
         scene.add(light, pose=camera_pose)
         color, _ = r.render(scene)
 
-        output_frame = f"demo/renders/tmp/{f:04d}.png"
+        output_frame = f"renders/tmp/{f:04d}.png"
         cv2.imwrite(output_frame, color)
         frame = cv2.imread(output_frame)
         video.write(frame)
@@ -182,34 +189,34 @@ def render(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name", type=str, default="pretrained_BIWI")
+    parser.add_argument("--model", type=str, default="model_name")
     parser.add_argument("--data_path", type=str, default="data", help='name of the dataset folder. eg: BIWI')
-    parser.add_argument("--dataset", type=str, default="BIWI", help='name of the dataset folder. eg: BIWI')
-    parser.add_argument("--fps", type=float, default=25, help='frame rate - 25 for BIWI')
+    parser.add_argument("--dataset", type=str, default="vocaset", help='name of the dataset folder. eg: BIWI')
+    parser.add_argument("--fps", type=float, default=30, help='frame rate - 25 for BIWI')
     parser.add_argument("--feature_dim", type=int, default=256, help='GRU Vertex Decoder hidden size')
-    parser.add_argument("--vertice_dim", type=int, default=70110, help='number of vertices - 23370*3 for BIWI')
+    parser.add_argument("--vertice_dim", type=int, default=15069, help='number of vertices - 23370*3 for BIWI')
     parser.add_argument("--device", type=str, default="cuda")
-    parser.add_argument("--train_subjects", type=str, default="F1 F2 F3 F4 F5 F6 F7 F8 M1 M2 M3 M4 M5 M6")
-    parser.add_argument("--test_subjects", type=str, default="F1 F2 F3 F4 F5 F6 F7 F8 M1 M2 M3 M4 M5 M6")
-    parser.add_argument("--wav_path", type=str, default="demo/wav/test.wav",
+    parser.add_argument("--train_subjects", type=str, default="FaceTalk_170728_03272_TA FaceTalk_170904_00128_TA FaceTalk_170725_00137_TA FaceTalk_170915_00223_TA FaceTalk_170811_03274_TA FaceTalk_170913_03279_TA FaceTalk_170904_03276_TA FaceTalk_170912_03278_TA")
+    parser.add_argument("--test_subjects", type=str, default="FaceTalk_170731_00024_TA FaceTalk_170809_00138_TA")
+    parser.add_argument("--wav_path", type=str, default="test.wav",
                         help='path of the input audio signal in .wav format')
-    parser.add_argument("--result_path", type=str, default="demo/result", help='path of the predictions in .npy format')
-    parser.add_argument("--condition", type=str, default="M3", help='select a conditioning subject from train_subjects')
-    parser.add_argument("--subject", type=str, default="M1",
+    parser.add_argument("--result_path", type=str, default="result", help='path of the predictions in .npy format')
+    parser.add_argument("--condition", type=str, default="FaceTalk_170728_03272_TA", help='select a conditioning subject from train_subjects')
+    parser.add_argument("--subject", type=str, default="FaceTalk_170731_00024_TA",
                         help='select a subject from test_subjects or train_subjects')
-    parser.add_argument("--template_path", type=str, default="templates.pkl",
+    parser.add_argument("--template_file", type=str, default="templates.pkl",
                         help='path of the personalized templates')
     parser.add_argument("--render_template_path", type=str, default="templates",
                         help='path of the mesh in BIWI topology')
     parser.add_argument("--input_fps", type=int, default=50,
                         help='HuBERT last hidden state produces 50 fps audio representation')
-    parser.add_argument("--output_fps", type=int, default=25,
+    parser.add_argument("--output_fps", type=int, default=30,
                         help='fps of the visual data, BIWI was captured in 25 fps')
-    parser.add_argument("--emotion", type=int, default="1",
-                        help='style control for emotion, 1 for expressive animation, 0 for neutral animation')
+    parser.add_argument("--emotion", type=int, default="0",
+                        help='style control for emotion, 1 for expressive animation, 0 for neutral animation')         ##useless ??
     parser.add_argument("--diff_steps", type=int, default=1000)
     parser.add_argument("--device_idx", type=int, default=0)
-    parser.add_argument("--gru_dim", type=int, default=512)
+    parser.add_argument("--gru_dim", type=int, default=256)
     parser.add_argument("--gru_layers", type=int, default=2)
     parser.add_argument("--skip_steps", type=int, default=0)
     args = parser.parse_args()
@@ -220,7 +227,7 @@ def main():
     # the blendshape results are to be rendered in external engines
     # like Maya, Blender, UE
     if args.dataset in ["BIWI", "multiface", "vocaset"]:
-        render(args)
+         render(args)
 
 
 if __name__ == "__main__":

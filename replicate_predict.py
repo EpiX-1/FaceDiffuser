@@ -66,7 +66,7 @@ def create_gaussian_diffusion(args):
     learn_sigma = False
     rescale_timesteps = False
 
-    betas = gd.get_named_beta_schedule("cosine", steps, scale_beta)
+    betas = gd.get_named_beta_schedule(args.beta_type, steps, scale_beta)
     loss_type = gd.LossType.MSE
 
     if not timestep_respacing:

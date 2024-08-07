@@ -7,7 +7,7 @@ LICENSE file in the root directory of this source tree.
 import numpy as np
 import os
 
-template_topology = "multiface/face_template.obj"
+template_topology = "templates/face_template.obj"
 
 
 def multiface2meshtalk(multiface_geometry, meshtalk_geometry):
