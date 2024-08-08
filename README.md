@@ -1,6 +1,6 @@
 # Fork changes
 
-This repository is a fork from the official FaceDiffuser repository to attempt some bug corrections. Please check out the official repository at this [link](https://github.com/uuembodiedsocialai/FaceDiffuser).
+This repository is a fork from the official FaceDiffuser repository to attempt some bug corrections and slight improvements to the code structure. Please check out the official repository at this [link](https://github.com/uuembodiedsocialai/FaceDiffuser).
 
 ## Installation
 For python 3.9:
@@ -25,6 +25,28 @@ For instance, if you want to train and evaluate a model you would use the follow
         python ./main.py --script test --config ./configs/vocaset.yaml
         python ./main.py --script evaluation.compute_objective_metrics --config ./configs/vocaset.yaml
 
+
+## Results
+
+With the config files included in this repository, I achieved the following results:
+
+
+| **Model**                  | **Trained** | **MVE ($ \times 10^{-5}$) (↓)** | **LVE ($ \times 10^{-5}$) (↓)** | **FDD ($ \times 10^{-5}$) (↓)** | **ABS FDD ($ \times 10^{-5}$) (↓)** | **Diversity ($ \times 10^{-5}$) (↑)** |
+|-----------------------------------|----------------------|------------------------------------------|------------------------------------------|------------------------------------------|----------------------------------------------|------------------------------------------------|
+| Official weights (grabbed from the official repo)    |                      | 104.90                                   | 7.8633                                   | 0.02171                                  | 0.02539                             | 74.436                                |
+| vocaset.yaml | :heavy_check_mark:           | 103.04                          | 7.6469                          | 0.02083                         | 0.02489                                      | 73.042                                         |
+
+*Table 1: Results obtained on the VOCASET dataset*
+
+
+
+| **Model**                  | **Trained** | **MVE ($ \times 10^{-5}$) (↓)** | **LVE ($ \times 10^{-5}$) (↓)** | **FDD ($ \times 10^{-5}$) (↓)** | **ABS FDD ($ \times 10^{-5}$) (↓)** | **Diversity ($ \times 10^{-5}$) (↑)** |
+|-----------------------------------|----------------------|------------------------------------------|------------------------------------------|------------------------------------------|----------------------------------------------|------------------------------------------------|
+| Official weights (grabbed from the official repo)        |                      | 6442.1                                   | 934.96                                   | 16.587                                   | 18.157                                       | 1548.1                                         |
+| multiface.yaml | :heavy_check_mark:            | 9618.7                                   | 1728.7                                   | -13.310                         | 24.876                                       | 9447.7                                |
+| multiface_no_conditioning.yaml  | :heavy_check_mark:            | 633.73                          | 74.228                                   | 7.5171                                   | 8.6142                                       | /                                              |
+
+*Table 2: Results obtained on the MULTIFACE dataset*
 
 ## Disclaimers
 
