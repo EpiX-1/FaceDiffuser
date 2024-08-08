@@ -133,7 +133,7 @@ def main(args):
     print('Lip Vertex Error: {:.4e}'.format(np.mean(L2_dis_mouth_max)))
     print('FDD: {:.4e}'.format(sum(motion_std_difference) / len(motion_std_difference)))
     print('ABS FDD: {:.4e}'.format(sum(abs_motion_std_difference) / len(motion_std_difference)))
-
+    compute_diversity(args)
 
 def compute_diversity(args):
     train_subject_list = args.train_subjects.split(" ")
@@ -201,4 +201,3 @@ def get_args():
 if __name__ == "__main__":
     args=get_args()
     main(args)
-    compute_diversity(args)

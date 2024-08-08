@@ -3,7 +3,7 @@ vertice_dim: 18516
 feature_dim: 256
 gru_dim: 256
 gru_layers: 2
-model: "model_name"
+model: "multiface"
 input_fps: 50
 output_fps: 30
 diff_steps: 1000
@@ -32,7 +32,7 @@ result_path: "result"
 ## TRAINING ##
 lr: 0.0001
 gradient_accumulation_steps: 1
-max_epoch: 1
+max_epoch: 50  
 device: "cuda"
 beta_type: "linear"   ## "cosine","linear"
 
