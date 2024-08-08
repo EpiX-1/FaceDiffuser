@@ -31,7 +31,7 @@ For instance, if you want to train and evaluate a model you would use the follow
 With the config files included in this repository, I achieved the following results:
 
 
-| **Model**                  | **Trained** | **MVE ($ \times 10^{-5}$) (↓)** | **LVE ($ \times 10^{-5}$) (↓)** | **FDD ($ \times 10^{-5}$) (↓)** | **ABS FDD ($ \times 10^{-5}$) (↓)** | **Diversity ($ \times 10^{-5}$) (↑)** |
+| **Model**                  | **Trained** | **MVE $(\times 10^{-5})$  (↓)** | **LVE $(\times 10^{-5})$ (↓)** | **FDD $(\times 10^{-5})$ (↓)** | **ABS FDD $(\times 10^{-5})$ (↓)** | **Diversity $(\times 10^{-5})$ (↑)** |
 |-----------------------------------|----------------------|------------------------------------------|------------------------------------------|------------------------------------------|----------------------------------------------|------------------------------------------------|
 | Official weights (grabbed from the official repo)    |                      | 104.90                                   | 7.8633                                   | 0.02171                                  | 0.02539                             | 74.436                                |
 | vocaset.yaml | :heavy_check_mark:           | 103.04                          | 7.6469                          | 0.02083                         | 0.02489                                      | 73.042                                         |
@@ -40,7 +40,7 @@ With the config files included in this repository, I achieved the following resu
 
 
 
-| **Model**                  | **Trained** | **MVE ($ \times 10^{-5}$) (↓)** | **LVE ($ \times 10^{-5}$) (↓)** | **FDD ($ \times 10^{-5}$) (↓)** | **ABS FDD ($ \times 10^{-5}$) (↓)** | **Diversity ($ \times 10^{-5}$) (↑)** |
+| **Model**                  | **Trained** | **MVE $(\times 10^{-5})$  (↓)** | **LVE $(\times 10^{-5})$ (↓)** | **FDD $(\times 10^{-5})$ (↓)** | **ABS FDD $(\times 10^{-5})$ (↓)** | **Diversity $(\times 10^{-5})$ (↑)** |
 |-----------------------------------|----------------------|------------------------------------------|------------------------------------------|------------------------------------------|----------------------------------------------|------------------------------------------------|
 | Official weights (grabbed from the official repo)        |                      | 6442.1                                   | 934.96                                   | 16.587                                   | 18.157                                       | 1548.1                                         |
 | multiface.yaml | :heavy_check_mark:            | 9618.7                                   | 1728.7                                   | -13.310                         | 24.876                                       | 9447.7                                |
